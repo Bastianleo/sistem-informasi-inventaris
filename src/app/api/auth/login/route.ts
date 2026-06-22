@@ -1,7 +1,8 @@
 import { NextRequest } from "next/server";
 
 import { jsonError, jsonOk } from "@/lib/api-response";
-import { verifyPassword } from "@/lib/password";
+// verifyPassword dikomentari karena kita beralih ke plain text sementara waktu
+// import { verifyPassword } from "@/lib/password";
 import { prisma } from "@/lib/prisma";
 import { createSessionToken, SESSION_COOKIE } from "@/lib/session";
 
@@ -25,7 +26,10 @@ export async function POST(request: NextRequest) {
     return jsonError("Email tidak ditemukan.", 401);
   }
 
-  const valid = await verifyPassword(password, user.password);
+  // ================================================================
+  // BYPASS VERIFIKASI: Menggunakan perbandingan teks biasa (Plain Text)
+  // ================================================================
+  const valid = password === user.password;
   if (!valid) {
     return jsonError("Kata sandi salah.", 401);
   }
