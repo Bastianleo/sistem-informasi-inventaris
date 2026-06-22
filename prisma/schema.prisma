@@ -1,0 +1,84 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL") 
+}
+
+enum Role {
+  ADMIN
+  STAFF
+}
+
+enum MovementType {
+  IN
+  OUT
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(STAFF)
+  createdAt DateTime @default(now())
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  description String    @default("")
+  products    Product[]
+  createdAt   DateTime  @default(now())
+}
+
+model Supplier {
+  id          String    @id @default(cuid())
+  name        String
+  contactName String
+  phone       String
+  email       String
+  address     String
+  products    Product[]
+  createdAt   DateTime  @default(now())
+}
+
+model Product {
+  id          String          @id @default(cuid())
+  sku         String          @unique
+  name        String
+  unit        String
+  costPrice   Int
+  sellPrice   Int
+  stock       Int             @default(0)
+  minStock    Int             @default(0)
+  description String?
+  categoryId  String
+  supplierId  String
+  category    Category        @relation(fields: [categoryId], references: [id])
+  supplier    Supplier        @relation(fields: [supplierId], references: [id])
+  movements   StockMovement[]
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@index([categoryId])
+  @@index([supplierId])
+}
+
+model StockMovement {
+  id        String       @id @default(cuid())
+  productId String
+  product   Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  type      MovementType
+  quantity  Int
+  date      DateTime
+  note      String?
+  reference String?
+  byName    String
+  createdAt DateTime     @default(now())
+
+  @@index([productId])
+}
